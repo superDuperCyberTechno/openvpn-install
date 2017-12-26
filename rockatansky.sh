@@ -181,7 +181,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	done
 else
 	clear
-	echo 'Welcome to this quick OpenVPN "road warrior" installer'
+	echo 'ROCKATANSKY OpenVPN with builtin malware blocking initial setup'
 	echo ""
 	# OpenVPN setup and first user creation
 	echo "I need to ask you a few questions before starting the setup"
@@ -189,7 +189,8 @@ else
 	echo ""
 	echo "First I need to know the ipv4 address of the network interface you want OpenVPN"
 	echo "listening to."
-	read -p "ip address: " -e -i $ip ip
+	read -p "IP address: " -e ip
+    ip=${ip:-$ip}
 	echo ""
 	echo "Which protocol do you want for OpenVPN connections?"
 	echo "   1) UDP (recommended)"
@@ -207,7 +208,8 @@ else
 	esac
 	echo ""
 	echo "What port do you want OpenVPN listening to?"
-	read -p "Port: " -e -i 1194 port
+	read -p "Port: " -e port
+    port=${port:-1194}
 	echo ""
 	echo "Which DNS do you want to use with the VPN?"
 	echo "   1) Current system resolvers"
