@@ -38,7 +38,7 @@ print_header() {
     echo " ______  _____  _______ _     _ _______ _______ _______ __   _ _______ _     _ __   __"
     echo "|_____/ |     | |       |____/  |_____|    |    |_____| | \  | |______ |____/    \_/  "
     echo "|    \_ |_____| |_____  |    \_ |     |    |    |     | |  \_| ______| |    \_    |"
-    echo "============================================================ OPENVPN SERVER SCRIPT"
+    echo "v1.0.3====================================================== OPENVPN SERVER SCRIPT"
 }
 
 newclient () {
@@ -190,7 +190,7 @@ else
 
 	echo ""
 	echo "Which protocol do you want for OpenVPN connections?"
-	echo "   1) UDP (recommended)"
+	echo "   1) UDP"
 	echo "   2) TCP"
 	read -p "Choose protocol [1]: " -e protocol
     protocol=${protocol:-1}
