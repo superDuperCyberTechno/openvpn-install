@@ -58,8 +58,6 @@ newclient () {
 	echo "</tls-auth>" >> ~/$1.ovpn
 }
 
-#get the server ip, credits to https://github.com/mpolden/ipd
-ip=$(curl ifconfig.co)
 
 #if the openvpn/server.conf file exists, we've done this before
 if [[ -e /etc/openvpn/server.conf ]]; then
@@ -189,8 +187,10 @@ else
 	echo ""
 	echo "First I need to know the ipv4 address of the network interface you want OpenVPN"
 	echo "listening to."
+    #get the server ip, credits to https://github.com/mpolden/ipd
+    detected_ip=$(curl ifconfig.co)
 	read -p "IP address [$ip]: " -e ip
-    ip=${ip:-$ip}
+    ip=${ip:-$detected_ip}
 	echo ""
 	echo "Which protocol do you want for OpenVPN connections?"
 	echo "   1) UDP (recommended)"
