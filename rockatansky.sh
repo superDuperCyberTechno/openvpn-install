@@ -178,18 +178,21 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	done
 else
 	clear
-	echo 'ROCKATANSKY OpenVPN with builtin malware blocking initial setup'
+	echo 'ROCKATANSKY OpenVPN server.'
 	echo ""
+
 	# OpenVPN setup and first user creation
-	echo "I need to ask you a few questions before starting the setup"
-	echo "You can leave the default options and just press enter if you are ok with them"
+	echo "I need to ask you a few questions before starting the setup."
+	echo "You can leave the default options and just press enter if you are OK with them."
 	echo ""
-	echo "First I need to know the ipv4 address of the network interface you want OpenVPN"
+	echo "First I need to know the IPv4 address of the network interface you want OpenVPN"
 	echo "listening to."
+
     #get the server ip, credits to https://github.com/mpolden/ipd
     ip_detected=$(curl -s ifconfig.co)
     read -p "IP address [$ip_detected]: " ip
     ip=${ip:-$ip_detected}
+
 	echo ""
 	echo "Which protocol do you want for OpenVPN connections?"
 	echo "   1) UDP (recommended)"
@@ -205,9 +208,10 @@ else
 		protocol=tcp
 		;;
 	esac
+
 	echo ""
-	echo "What port do you want OpenVPN listening to?"
-	read -p "Port: " -e port
+	echo "Which port do you want OpenVPN listening to?"
+	read -p "Port [1194]: " -e port
     port=${port:-1194}
 	echo ""
 	echo "Which DNS do you want to use with the VPN?"
