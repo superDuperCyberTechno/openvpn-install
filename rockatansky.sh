@@ -1,11 +1,6 @@
 #!/bin/bash
 
-echo " ______  _____  _______ _     _ _______ _______ _______ __   _ _______ _     _ __   __"
-echo "|_____/ |     | |       |____/  |_____|    |    |_____| | \  | |______ |____/    \_/  "
-echo "|    \_ |_____| |_____  |    \_ |     |    |    |     | |  \_| ______| |    \_    |"
-echo "============================================================ OPENVPN SERVER SCRIPT"
-
-# Detect Debian users running the script with "sh" instead of bash
+#detect Debian users running the script with "sh" instead of bash
 if readlink /proc/$$/exe | grep -qs "dash"; then
 	echo "This script needs to be run with bash, not sh"
 	exit 1
@@ -38,6 +33,13 @@ else
 	exit 5
 fi
 
+print_header() {
+    echo " ______  _____  _______ _     _ _______ _______ _______ __   _ _______ _     _ __   __"
+    echo "|_____/ |     | |       |____/  |_____|    |    |_____| | \  | |______ |____/    \_/  "
+    echo "|    \_ |_____| |_____  |    \_ |     |    |    |     | |  \_| ______| |    \_    |"
+    echo "============================================================ OPENVPN SERVER SCRIPT"
+}
+
 newclient () {
 	# Generates the custom client.ovpn
 	cp /etc/openvpn/client-common.txt ~/$1.ovpn
@@ -61,8 +63,8 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	while :
 	do
 	clear
-		echo "Looks like OpenVPN is already installed"
-		echo ""
+        print_header
+		echo "Looks like OpenVPN is already installed."
 		echo "What do you want to do?"
 		echo "   1) Add a new user"
 		echo "   2) Revoke an existing user"
@@ -176,10 +178,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	done
 else
 	clear
-	echo 'ROCKATANSKY OpenVPN server.'
-	echo ""
-
-	# OpenVPN setup and first user creation
+    print_header
 	echo "I need to ask you a few questions before starting the setup."
 	echo "You can leave the default options and just press enter if you are OK with them."
 	echo ""
