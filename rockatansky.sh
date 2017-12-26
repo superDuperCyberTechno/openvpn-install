@@ -189,7 +189,7 @@ else
 	echo ""
 	echo "First I need to know the ipv4 address of the network interface you want OpenVPN"
 	echo "listening to."
-	read -p "IP address: " -e ip
+	read -p "IP address [$ip]: " -e ip
     ip=${ip:-$ip}
 	echo ""
 	echo "Which protocol do you want for OpenVPN connections?"
