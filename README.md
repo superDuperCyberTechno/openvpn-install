@@ -1,4 +1,4 @@
-![Rockatansky](https://raw.githubusercontent.com/superDuperCyberTechno/openvpn-install/master/header.png)
+![Rockatansky](https://raw.githubusercontent.com/superDuperCyberTechno/rockatansky/master/header.png)
 
 OpenVPN server installation script, suitable for tech savvy [road warrior](http://en.wikipedia.org/wiki/Road_warrior_%28computing%29)s. Compatible with Debian, Ubuntu and CentOS.
 
