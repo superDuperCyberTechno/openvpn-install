@@ -20,6 +20,7 @@ if grep -qs "CentOS release 5" "/etc/redhat-release"; then
 	echo "CentOS 5 is too old and not supported."
 	exit 4
 fi
+
 if [[ -e /etc/debian_version ]]; then
 	OS=debian
 	GROUPNAME=nogroup
@@ -56,7 +57,6 @@ newclient () {
 	cat /etc/openvpn/ta.key >> ~/$1.ovpn
 	echo "</tls-auth>" >> ~/$1.ovpn
 }
-
 
 #if the openvpn/server.conf file exists, we've done this before
 if [[ -e /etc/openvpn/server.conf ]]; then
@@ -176,6 +176,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			4) exit;;
 		esac
 	done
+else
 	clear
     print_header
 	echo "I need to ask you a few questions before starting the setup."
