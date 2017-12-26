@@ -188,7 +188,7 @@ else
 	echo "First I need to know the ipv4 address of the network interface you want OpenVPN"
 	echo "listening to."
     #get the server ip, credits to https://github.com/mpolden/ipd
-    detected_ip=$(curl ifconfig.co)
+    detected_ip=$(curl -s ifconfig.co)
 	read -p "IP address [$ip]: " -e ip
     ip=${ip:-$detected_ip}
 	echo ""
@@ -411,7 +411,7 @@ exit 0' > $RCLOCAL
 		fi
 	fi
 	# Try to detect a NATed connection and ask about it to potential LowEndSpirit users
-	external_ip=$(curl ifconfig.co)
+	external_ip=$(curl -s ifconfig.co)
 	if [[ "$ip" != "$external_ip" ]]; then
 		echo ""
 		echo "Looks like your server is behind a NAT!"
