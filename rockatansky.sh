@@ -7,7 +7,6 @@
 # your Debian/Ubuntu/CentOS box. It has been designed to be as unobtrusive and
 # universal as possible.
 
-
 # Detect Debian users running the script with "sh" instead of bash
 if readlink /proc/$$/exe | grep -qs "dash"; then
 	echo "This script needs to be run with bash, not sh"
@@ -188,9 +187,9 @@ else
 	echo "First I need to know the ipv4 address of the network interface you want OpenVPN"
 	echo "listening to."
     #get the server ip, credits to https://github.com/mpolden/ipd
-    detected_ip=$(curl -s ifconfig.co)
-	read -p "IP address [$ip]: " -e ip
-    ip=${ip:-$detected_ip}
+    ip_detected=$(curl -s ifconfig.co)
+    read -p "IP address [$ip_detected]: " ip
+    ip=${ip:-$ip_detected}
 	echo ""
 	echo "Which protocol do you want for OpenVPN connections?"
 	echo "   1) UDP (recommended)"
