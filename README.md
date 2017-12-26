@@ -9,11 +9,11 @@ This script will let you setup your own VPN server in no more than a minute, eve
 In addition, it automatically maintains an internal malware blocklist based on the [StevenBlack/hosts](https://github.com/StevenBlack/hosts) project, isolating you from a constantly tweaked list of potential threats.
 
 ### Installation
-Run the script and follow the assistant:
+Run the script and follow the wizard:
 
 `wget https://raw.githubusercontent.com/superDuperCyberTechno/rockatansky/master/rockatansky.sh -O openvpn-install.sh && bash openvpn-install.sh`
 
 Once it ends, you can run it again to add more users, remove some of them or even completely uninstall OpenVPN.
 
-###Client
+### Client
 Please be aware, this is only 50% of a VPN connection. You need a local client to hook up your machine to the server. A good example could be the [Pritunl Client](https://client.pritunl.com/).
