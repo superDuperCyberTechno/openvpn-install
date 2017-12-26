@@ -160,9 +160,9 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 					fi
 				fi
 				if [[ "$OS" = 'debian' ]]; then
-					apt-get remove --purge -y openvpn
+					apt-get remove --purge -y openvpn dnsmasq
 				else
-					yum remove openvpn -y
+					yum remove openvpn dnsmasq -y
 				fi
 				rm -rf /etc/openvpn
 				echo ""
@@ -402,7 +402,6 @@ verb 3" > /etc/openvpn/client-common.txt
 
     #set up the dnsmasq delegations
     printf "domain-needed\nbogus-priv\n" >> /etc/dnsmasq.conf
-    printf "server=8.8.8.8\nserver=8.8.4.4\n" >> /etc/dnsmasq.conf    
 
 	#DNS
 	case $dns in
@@ -413,34 +412,33 @@ verb 3" > /etc/openvpn/client-common.txt
 			echo "server=$line\"" >> /etc/dnsmasq.conf
 		done
 		;;
-
         #Google
 		2) 
-		echo 'server=8.8.8.8"' >> /etc/dnsmasq.conf
-		echo 'server=8.8.4.4"' >> /etc/dnsmasq.conf
+		echo 'server=8.8.8.8' >> /etc/dnsmasq.conf
+		echo 'server=8.8.4.4' >> /etc/dnsmasq.conf
 		;;
 
         #OpenDNS
 		3)
-		echo 'server=208.67.222.222"' >> /etc/dnsmasq.conf
-		echo 'server=208.67.220.220"' >> /etc/dnsmasq.conf
+		echo 'server=208.67.222.222' >> /etc/dnsmasq.conf
+		echo 'server=208.67.220.220' >> /etc/dnsmasq.conf
 		;;
         
         #NTT
 		4) 
-		echo 'server=129.250.35.250"' >> /etc/dnsmasq.conf
-		echo 'server=129.250.35.251"' >> /etc/dnsmasq.conf
+		echo 'server=129.250.35.250' >> /etc/dnsmasq.conf
+		echo 'server=129.250.35.251' >> /etc/dnsmasq.conf
 		;;
         
         #Hurricane Electric
 		5) 
-		echo 'server=74.82.42.42"' >> /etc/dnsmasq.conf
+		echo 'server=74.82.42.42' >> /etc/dnsmasq.conf
 		;;
 
         #VeriSign
 		6) 
-		echo 'server=64.6.64.6"' >> /etc/dnsmasq.conf
-		echo 'server=64.6.65.6"' >> /etc/dnsmasq.conf
+		echo 'server=64.6.64.6' >> /etc/dnsmasq.conf
+		echo 'server=64.6.65.6' >> /etc/dnsmasq.conf
 		;;
 	esac
 
@@ -459,7 +457,7 @@ verb 3" > /etc/openvpn/client-common.txt
     sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts
 
     #add the command above the crontab
-    echo "crontab \"0 0 * * * sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts && service dnsmasq restart\"" > cronjob
+    echo "\"0 0 * * * sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts && service dnsmasq restart\"" > cronjob
     crontab cronjob && rm cronjob
 
 	echo ""
