@@ -176,14 +176,11 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			4) exit;;
 		esac
 	done
-else
 	clear
     print_header
 	echo "I need to ask you a few questions before starting the setup."
 	echo "You can leave the default options and just press enter if you are OK with them."
-	echo ""
-	echo "First I need to know the IPv4 address of the network interface you want OpenVPN"
-	echo "listening to."
+	echo "First I need to know the IPv4 address of the network interface you want OpenVPN listening to."
 
     #get the server ip, credits to https://github.com/mpolden/ipd
     ip_detected=$(curl -s ifconfig.co)
@@ -231,11 +228,11 @@ else
 
 	if [[ "$OS" = 'debian' ]]; then
 		apt-get update
-		apt-get install openvpn iptables openssl ca-certificates -y
+		apt-get install dnsmasq openvpn iptables openssl ca-certificates -y
 	else
 		#else, the distro is CentOS
 		yum install epel-release -y
-		yum install openvpn iptables openssl wget ca-certificates -y
+		yum install dnsmasq openvpn iptables openssl wget ca-certificates -y
 	fi
 
 	#an old version of easy-rsa was available by default in some openvpn packages, so remove it
@@ -289,48 +286,8 @@ tls-auth ta.key 0
 topology subnet
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
-push \"redirect-gateway def1 bypass-dhcp\"" > /etc/openvpn/server.conf
-
-	#DNS
-	case $dns in
-        #default dns
-		1) 
-		#obtain the resolvers from resolv.conf and use them for OpenVPN
-		grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
-			echo "push \"dhcp-option DNS $line\"" >> /etc/openvpn/server.conf
-		done
-		;;
-
-        #Google
-		2) 
-		echo 'push "dhcp-option DNS 8.8.8.8"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 8.8.4.4"' >> /etc/openvpn/server.conf
-		;;
-
-        #OpenDNS
-		3)
-		echo 'push "dhcp-option DNS 208.67.222.222"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 208.67.220.220"' >> /etc/openvpn/server.conf
-		;;
-        
-        #NTT
-		4) 
-		echo 'push "dhcp-option DNS 129.250.35.250"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 129.250.35.251"' >> /etc/openvpn/server.conf
-		;;
-        
-        #Hurricane Electric
-		5) 
-		echo 'push "dhcp-option DNS 74.82.42.42"' >> /etc/openvpn/server.conf
-		;;
-
-        #VeriSign
-		6) 
-		echo 'push "dhcp-option DNS 64.6.64.6"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 64.6.65.6"' >> /etc/openvpn/server.conf
-		;;
-	esac
-	echo "keepalive 10 120
+push \"redirect-gateway def1 bypass-dhcp\"
+keepalive 10 120
 cipher AES-256-CBC
 comp-lzo
 user nobody
@@ -340,39 +297,37 @@ persist-tun
 status openvpn-status.log
 verb 3
 crl-verify crl.pem" >> /etc/openvpn/server.conf
-	# Enable net.ipv4.ip_forward for the system
+
+	#enable net.ipv4.ip_forward for the system
 	sed -i '/\<net.ipv4.ip_forward\>/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
 	if ! grep -q "\<net.ipv4.ip_forward\>" /etc/sysctl.conf; then
 		echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 	fi
-	# Avoid an unneeded reboot
+	#avoid an unneeded reboot
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 	if pgrep firewalld; then
-		# Using both permanent and not permanent rules to avoid a firewalld
-		# reload.
-		# We don't use --add-service=openvpn because that would only work with
-		# the default port and protocol.
+		#using both permanent and not permanent rules to avoid a firewalld reload.
+		#we don't use --add-service=openvpn because that would only work wih the default port and protocol.
 		firewall-cmd --zone=public --add-port=$port/$protocol
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=public --add-port=$port/$protocol
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
-		# Set NAT for the VPN subnet
+		#set NAT for the VPN subnet
 		firewall-cmd --direct --add-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $ip
 		firewall-cmd --permanent --direct --add-rule ipv4 nat POSTROUTING 0 -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $ip
 	else
-		# Needed to use rc.local with some systemd distros
+		#needed to use rc.local with some systemd distros
 		if [[ "$OS" = 'debian' && ! -e $RCLOCAL ]]; then
 			echo '#!/bin/sh -e
 exit 0' > $RCLOCAL
 		fi
 		chmod +x $RCLOCAL
-		# Set NAT for the VPN subnet
+		#set NAT for the VPN subnet
 		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $ip
 		sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to $ip" $RCLOCAL
 		if iptables -L -n | grep -qE '^(REJECT|DROP)'; then
-			# If iptables has at least one REJECT rule, we asume this is needed.
-			# Not the best approach but I can't think of other and this shouldn't
-			# cause problems.
+			#if iptables has at least one REJECT rule, we asume this is needed.
+			#not the best approach but I can't think of other and this shouldn't cause problems.
 			iptables -I INPUT -p $protocol --dport $port -j ACCEPT
 			iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
 			iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
@@ -381,11 +336,11 @@ exit 0' > $RCLOCAL
 			sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" $RCLOCAL
 		fi
 	fi
-	# If SELinux is enabled and a custom port or TCP was selected, we need this
+	#if SELinux is enabled and a custom port or TCP was selected, we need this
 	if hash sestatus 2>/dev/null; then
 		if sestatus | grep "Current mode" | grep -qs "enforcing"; then
 			if [[ "$port" != '1194' || "$protocol" = 'tcp' ]]; then
-				# semanage isn't available in CentOS 6 by default
+				#semanage isn't available in CentOS 6 by default
 				if ! hash semanage 2>/dev/null; then
 					yum install policycoreutils-python -y
 				fi
@@ -393,9 +348,9 @@ exit 0' > $RCLOCAL
 			fi
 		fi
 	fi
-	# And finally, restart OpenVPN
+	#and finally, restart OpenVPN
 	if [[ "$OS" = 'debian' ]]; then
-		# Little hack to check for systemd
+		#little hack to check for systemd
 		if pgrep systemd-journal; then
 			systemctl restart openvpn@server.service
 		else
@@ -410,7 +365,7 @@ exit 0' > $RCLOCAL
 			chkconfig openvpn on
 		fi
 	fi
-	# Try to detect a NATed connection and ask about it to potential LowEndSpirit users
+	#try to detect a NATed connection and ask about it to potential LowEndSpirit users
 	external_ip=$(curl -s ifconfig.co)
 	if [[ "$ip" != "$external_ip" ]]; then
 		echo ""
@@ -423,7 +378,7 @@ exit 0' > $RCLOCAL
 			ip=$user_external_ip
 		fi
 	fi
-	# client-common.txt is created so we have a template to add further users later
+	#client-common.txt is created so we have a template to add further users later
 	echo "client
 dev tun
 proto $protocol
@@ -443,9 +398,74 @@ key-direction 1
 verb 3" > /etc/openvpn/client-common.txt
 	# Generates the custom client.ovpn
 	newclient "$client"
+
+    #set up the dnsmasq delegations
+    printf "domain-needed\nbogus-priv\n" >> /etc/dnsmasq.conf
+    printf "server=8.8.8.8\nserver=8.8.4.4\n" >> /etc/dnsmasq.conf    
+
+	#DNS
+	case $dns in
+        #default dns
+		1) 
+		#obtain the resolvers from resolv.conf and use them for OpenVPN
+		grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
+			echo "server=$line\"" >> /etc/dnsmasq.conf
+		done
+		;;
+
+        #Google
+		2) 
+		echo 'server=8.8.8.8"' >> /etc/dnsmasq.conf
+		echo 'server=8.8.4.4"' >> /etc/dnsmasq.conf
+		;;
+
+        #OpenDNS
+		3)
+		echo 'server=208.67.222.222"' >> /etc/dnsmasq.conf
+		echo 'server=208.67.220.220"' >> /etc/dnsmasq.conf
+		;;
+        
+        #NTT
+		4) 
+		echo 'server=129.250.35.250"' >> /etc/dnsmasq.conf
+		echo 'server=129.250.35.251"' >> /etc/dnsmasq.conf
+		;;
+        
+        #Hurricane Electric
+		5) 
+		echo 'server=74.82.42.42"' >> /etc/dnsmasq.conf
+		;;
+
+        #VeriSign
+		6) 
+		echo 'server=64.6.64.6"' >> /etc/dnsmasq.conf
+		echo 'server=64.6.65.6"' >> /etc/dnsmasq.conf
+		;;
+	esac
+
+    printf "listen-address=127.0.0.1\nlisten-address=10.8.0.1\n" >> /etc/dnsmasq.conf
+    printf "push \"dhcp-option DNS 10.8.0.1\"\n" >> /etc/openvpn/server.conf
+
+    #fetch the blacklist from StevenBlack/hosts
+    #the list is filtered so that only delegations beginning with "0.0.0.0" is added to the host
+    #file. there's 2 reasons for this:
+    #1. we are relying blindly on a third party list for protection, by filtering all
+    #non-0.0.0.0 hosts we make sure that no malicious re-delegations sneak their way into the list.
+    #2. since all added hosts start with "0.0.0.0" we can easily re-use the hosts file (before we
+    #concatenate the new hosts, we remove all lines starting with "0.0.0.0"),
+    #making it possible for users to maintain their own host delegations (provided that they do not
+    #begin with "0.0.0.0", that is).
+    sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts
+
+    #add the command above the crontab
+    echo "crontab \"0 0 * * * sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts && service dnsmasq restart\"" > cronjob
+    crontab cronjob && rm cronjob
+
 	echo ""
 	echo "Finished!"
 	echo ""
 	echo "Your client configuration is available at" ~/"$client.ovpn"
 	echo "If you want to add more clients, you simply need to run this script again!"
+
+    service dnsmasq restart
 fi
