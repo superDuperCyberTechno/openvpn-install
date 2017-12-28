@@ -38,11 +38,11 @@ print_header() {
     echo " ______  _____  _______ _     _ _______ _______ _______ __   _ _______ _     _ __   __"
     echo "|_____/ |     | |       |____/  |_____|    |    |_____| | \  | |______ |____/    \_/  "
     echo "|    \_ |_____| |_____  |    \_ |     |    |    |     | |  \_| ______| |    \_    |"
-    echo "v1.0.3====================================================== OPENVPN SERVER SCRIPT"
+    echo "v1.0.4 ===================================================== OPENVPN SERVER SCRIPT"
 }
 
 newclient () {
-	# Generates the custom client.ovpn
+	#generates the custom client.ovpn
 	cp /etc/openvpn/client-common.txt ~/$1.ovpn
 	echo "<ca>" >> ~/$1.ovpn
 	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1.ovpn
@@ -64,11 +64,11 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	do
 	clear
         print_header
-		echo "Looks like OpenVPN is already installed."
+		echo "Looks like Rockatansky has already been installed."
 		echo "What do you want to do?"
 		echo "   1) Add a new user"
 		echo "   2) Revoke an existing user"
-		echo "   3) Remove OpenVPN"
+		echo "   3) Remove Rockatansky"
 		echo "   4) Exit"
 		read -p "Select an option [4]: " option
         #cast to default value
@@ -269,10 +269,10 @@ else
 	#CRL is read with each client connection, when OpenVPN is dropped to nobody
 	chown nobody:$GROUPNAME /etc/openvpn/crl.pem
 
-	# Generate key for tls-auth
+	#generate key for tls-auth
 	openvpn --genkey --secret /etc/openvpn/ta.key
 
-	# Generate server.conf
+	#generate server.conf
 	echo "port $port
 proto $protocol
 dev tun
@@ -397,7 +397,7 @@ comp-lzo
 setenv opt block-outside-dns
 key-direction 1
 verb 3" > /etc/openvpn/client-common.txt
-	# Generates the custom client.ovpn
+	#generates the custom client.ovpn
 	newclient "$client"
 
     #set up the dnsmasq delegations
@@ -466,5 +466,5 @@ verb 3" > /etc/openvpn/client-common.txt
 	echo "Your client configuration is available at" ~/"$client.ovpn"
 	echo "If you want to add more clients, you simply need to run this script again!"
 
-    service dnsmasq restart
+    service openvpn dnsmasq restart
 fi
