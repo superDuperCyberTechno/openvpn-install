@@ -409,7 +409,7 @@ verb 3" > /etc/openvpn/client-common.txt
 		1) 
 		#obtain the resolvers from resolv.conf and use them for OpenVPN
 		grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
-			echo "server=$line\"" >> /etc/dnsmasq.conf
+			echo "server=$line" >> /etc/dnsmasq.conf
 		done
 		;;
         #Google
