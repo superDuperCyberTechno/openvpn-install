@@ -11,7 +11,7 @@ In addition, it automatically maintains an internal malware blocklist based on t
 ### Installation
 Run the script and follow the wizard:
 
-`wget https://raw.githubusercontent.com/superDuperCyberTechno/rockatansky/master/rockatansky.sh -O openvpn-install.sh && bash openvpn-install.sh`
+`wget https://raw.githubusercontent.com/superDuperCyberTechno/rockatansky/master/rockatansky.sh -O rockatansky.sh && bash rockatansky.sh`
 
 Once it ends, you can run it again to add more users, remove some of them or even completely uninstall OpenVPN.
 

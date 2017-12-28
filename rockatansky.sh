@@ -457,7 +457,7 @@ verb 3" > /etc/openvpn/client-common.txt
     sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts
 
     #add the command above the crontab
-    echo "\"0 0 * * * sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts && service dnsmasq restart\"" > cronjob
+    echo "0 0 * * * sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts && service dnsmasq restart" > cronjob
     crontab cronjob && rm cronjob
 
 	echo ""
