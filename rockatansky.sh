@@ -125,9 +125,20 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 
 			3) 
 			echo ""
-            read -p "Do you really want to remove OpenVPN? [Y/n]: " -e remove
+            read -p "Do you really want to remove Rockatansky? [Y/n]: " -e remove
             remove=${remove:-'y'}
 			if [[ "$remove" = 'y' ]]; then
+                #remove the blackholed hosts
+                sed -i '/^0\.0\.0\.0/d' /etc/hosts
+
+                #remove the cron job
+                crontab -l > cronjobs
+                #we assume that no other cronjob includes the word "StevenBlack"
+                sed -i "/StevenBlack/d" cronjobs
+                crontab cronjobs
+                rm cronjobs
+
+                sed -i "/\b\(cat\|rat\)\b/d" 
 				port=$(grep '^port ' /etc/openvpn/server.conf | cut -d " " -f 2)
 				protocol=$(grep '^proto ' /etc/openvpn/server.conf | cut -d " " -f 2)
 				if pgrep firewalld; then
@@ -455,10 +466,10 @@ verb 3" > /etc/openvpn/client-common.txt
     #concatenate the new hosts, we remove all lines starting with "0.0.0.0"),
     #making it possible for users to maintain their own host delegations (provided that they do not
     #begin with "0.0.0.0", that is).
-    sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts
+    sed -i '/^0\.0\.0\.0/d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts
 
     #add the command above the crontab
-    echo "0 0 * * * sed -i '/^0\.0\.0\.0/ d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts && service dnsmasq restart" > cronjob
+    echo "0 0 * * * sed -i '/^0\.0\.0\.0/d' /etc/hosts && curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep -e '^0\.0\.0\.0' >> /etc/hosts && service dnsmasq restart" > cronjob
     crontab cronjob && rm cronjob
 
 	echo ""
