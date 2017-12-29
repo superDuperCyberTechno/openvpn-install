@@ -478,5 +478,7 @@ verb 3" > /etc/openvpn/client-common.txt
 	echo "Your client configuration is available at" ~/"$client.ovpn"
 	echo "If you want to add more clients, you simply need to run this script again!"
 
-    service openvpn dnsmasq restart
+    #sorta hacky, not sure what fails to load but rebooting the server makes it work
+    #not optimal
+    reboot now
 fi
