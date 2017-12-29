@@ -233,6 +233,7 @@ else
 	echo "Finally, tell me your name for the client certificate."
 	echo "Please, use one word only, no special characters."
 	read -p "Client name [client]: " -e client
+    #if no name is provided, use the default 'client'
     client=${client:-'client'}
 	echo ""
 	echo "Okay, that was all I needed. We are ready to setup your OpenVPN server now."
@@ -254,16 +255,17 @@ else
 
 	#get easy-rsa
 	wget -O ~/EasyRSA-3.0.3.tgz "https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.3/EasyRSA-3.0.3.tgz"
-	tar xzf ~/EasyRSA-3.0.3.tgz -C ~/
+	tar -xzf ~/EasyRSA-3.0.3.tgz -C ~/
+	rm -rf ~/EasyRSA-3.0.3.tgz
     
 	#temporary fix for issue #353, which is caused by OpenVPN/easy-rsa#135
 	# Will be removed as soon as a new release of easy-rsa is available
 	sed -i 's/\[\[/\[/g;s/\]\]/\]/g;s/==/=/g' ~/EasyRSA-3.0.3/easyrsa
 
-	mv ~/EasyRSA-3.0.3/ /etc/openvpn/
-	mv /etc/openvpn/EasyRSA-3.0.3/ /etc/openvpn/easy-rsa/
+	# mv ~/EasyRSA-3.0.3/ /etc/openvpn/
+	# mv /etc/openvpn/EasyRSA-3.0.3/ /etc/openvpn/easy-rsa/
+	mv ~/EasyRSA-3.0.3/ /etc/openvpn/easy-rsa/
 	chown -R root:root /etc/openvpn/easy-rsa/
-	rm -rf ~/EasyRSA-3.0.3.tgz
 
 	cd /etc/openvpn/easy-rsa/
 	#create the PKI, set up the CA, the DH params and the server + client certificates
