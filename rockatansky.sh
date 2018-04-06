@@ -220,16 +220,16 @@ else
 	read -p "Port [1194]: " -e port
     port=${port:-1194}
 	echo ""
-	echo "Which DNS do you want to use with the VPN?"
-	echo "   1) Current system resolvers"
-	echo "   2) Google"
-	echo "   3) OpenDNS"
-	echo "   4) NTT"
-	echo "   5) Hurricane Electric"
-	echo "   6) Verisign"
-	read -p "DNS [1]: " -e dns
-    dns=${dns:-1}
-	echo ""
+	# echo "Which DNS do you want to use with the VPN?"
+	# echo "   1) Current system resolvers"
+	# echo "   2) Google"
+	# echo "   3) OpenDNS"
+	# echo "   4) NTT"
+	# echo "   5) Hurricane Electric"
+	# echo "   6) Verisign"
+	# read -p "DNS [1]: " -e dns
+    # dns=${dns:-1}
+	# echo ""
 	echo "Finally, tell me your name for the client certificate."
 	echo "Please, use one word only, no special characters."
 	read -p "Client name [client]: " -e client
@@ -254,17 +254,10 @@ else
 	fi
 
 	#get easy-rsa
-	wget -O ~/EasyRSA-3.0.3.tgz "https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.3/EasyRSA-3.0.3.tgz"
-	tar -xzf ~/EasyRSA-3.0.3.tgz -C ~/
-	rm -rf ~/EasyRSA-3.0.3.tgz
-    
-	#temporary fix for issue #353, which is caused by OpenVPN/easy-rsa#135
-	# Will be removed as soon as a new release of easy-rsa is available
-	sed -i 's/\[\[/\[/g;s/\]\]/\]/g;s/==/=/g' ~/EasyRSA-3.0.3/easyrsa
-
-	# mv ~/EasyRSA-3.0.3/ /etc/openvpn/
-	# mv /etc/openvpn/EasyRSA-3.0.3/ /etc/openvpn/easy-rsa/
-	mv ~/EasyRSA-3.0.3/ /etc/openvpn/easy-rsa/
+	wget -O ~/EasyRSA-3.0.4.tgz "https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz"
+	tar -xzf ~/EasyRSA-3.0.4.tgz -C ~/
+	rm -rf ~/EasyRSA-3.0.4.tgz
+	mv ~/EasyRSA-3.0.4/ /etc/openvpn/easy-rsa/
 	chown -R root:root /etc/openvpn/easy-rsa/
 
 	cd /etc/openvpn/easy-rsa/
@@ -333,8 +326,7 @@ duplicate-cn" >> /etc/openvpn/server.conf
 	else
 		#needed to use rc.local with some systemd distros
 		if [[ "$OS" = 'debian' && ! -e $RCLOCAL ]]; then
-			echo '#!/bin/sh -e
-exit 0' > $RCLOCAL
+			printf '#!/bin/sh -e\nexit 0' > $RCLOCAL
 		fi
 		chmod +x $RCLOCAL
 		#set NAT for the VPN subnet
@@ -418,43 +410,47 @@ verb 3" > /etc/openvpn/client-common.txt
     printf "domain-needed\nbogus-priv\n" >> /etc/dnsmasq.conf
 
 	#DNS
-	case $dns in
-        #default dns
-		1) 
-		#obtain the resolvers from resolv.conf and use them for OpenVPN
-		grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
-			echo "server=$line" >> /etc/dnsmasq.conf
-		done
-		;;
-        #Google
-		2) 
-		echo 'server=8.8.8.8' >> /etc/dnsmasq.conf
-		echo 'server=8.8.4.4' >> /etc/dnsmasq.conf
-		;;
+    echo 'server=1.1.1.1' >> /etc/dnsmasq.conf
+    echo 'server=1.0.0.1' >> /etc/dnsmasq.conf
 
-        #OpenDNS
-		3)
-		echo 'server=208.67.222.222' >> /etc/dnsmasq.conf
-		echo 'server=208.67.220.220' >> /etc/dnsmasq.conf
-		;;
-        
-        #NTT
-		4) 
-		echo 'server=129.250.35.250' >> /etc/dnsmasq.conf
-		echo 'server=129.250.35.251' >> /etc/dnsmasq.conf
-		;;
-        
-        #Hurricane Electric
-		5) 
-		echo 'server=74.82.42.42' >> /etc/dnsmasq.conf
-		;;
-
-        #VeriSign
-		6) 
-		echo 'server=64.6.64.6' >> /etc/dnsmasq.conf
-		echo 'server=64.6.65.6' >> /etc/dnsmasq.conf
-		;;
-	esac
+    # JUST USE 1.1.1.1
+	# case $dns in
+    #     #default dns
+	# 	1) 
+	# 	#obtain the resolvers from resolv.conf and use them for OpenVPN
+	# 	grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
+	# 		echo "server=$line" >> /etc/dnsmasq.conf
+	# 	done
+	# 	;;
+    #     #Google
+	# 	2) 
+	# 	echo 'server=8.8.8.8' >> /etc/dnsmasq.conf
+	# 	echo 'server=8.8.4.4' >> /etc/dnsmasq.conf
+	# 	;;
+    #
+    #     #OpenDNS
+	# 	3)
+	# 	echo 'server=208.67.222.222' >> /etc/dnsmasq.conf
+	# 	echo 'server=208.67.220.220' >> /etc/dnsmasq.conf
+	# 	;;
+    #     
+    #     #NTT
+	# 	4) 
+	# 	echo 'server=129.250.35.250' >> /etc/dnsmasq.conf
+	# 	echo 'server=129.250.35.251' >> /etc/dnsmasq.conf
+	# 	;;
+    #     
+    #     #Hurricane Electric
+	# 	5) 
+	# 	echo 'server=74.82.42.42' >> /etc/dnsmasq.conf
+	# 	;;
+    #
+    #     #VeriSign
+	# 	6) 
+	# 	echo 'server=64.6.64.6' >> /etc/dnsmasq.conf
+	# 	echo 'server=64.6.65.6' >> /etc/dnsmasq.conf
+	# 	;;
+	# esac
 
     printf "listen-address=127.0.0.1\nlisten-address=10.8.0.1\n" >> /etc/dnsmasq.conf
     printf "push \"dhcp-option DNS 10.8.0.1\"\n" >> /etc/openvpn/server.conf
