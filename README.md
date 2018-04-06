@@ -9,6 +9,8 @@ In addition, it automatically maintains an internal malware blocklist based on t
 
 Originally, this was an amalgamation of [Nyr/openvpn-install](https://github.com/Nyr/openvpn-install) and [BobNisco/adblocking-vpn](https://github.com/BobNisco/adblocking-vpn), but it has evolved beyond those.
 
+Rockatansky uses [1.1.1.1](https://1.1.1.1) as DNS resolver.
+
 ### Installation
 Run the script as root and follow the wizard:
 
